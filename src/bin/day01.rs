@@ -26,6 +26,8 @@ fn parse_input(input: &str) -> Vec<Elf> {
         elf.calories.push(line.parse().unwrap())
     }
 
+    elves.push(elf);
+
     return elves;
 }
 
@@ -34,16 +36,39 @@ fn part1(input: &str) -> u64 {
     elves.iter().map(|elf| elf.total_calories()).max().unwrap()
 }
 
-fn main() {}
+fn part2(input: &str) -> u64 {
+    let elves = parse_input(input);
+    let mut calories: Vec<u64> = elves.iter().map(Elf::total_calories).collect();
+    calories.sort();
 
-#[test]
-fn test_day01_sample() {
-    const SAMPLE_INPUT: &'static str = include_str!("../../inputs/day01_sample.txt");
-
-    assert_eq!(part1(SAMPLE_INPUT), 24000)
+    calories.iter().rev().take(3).sum()
 }
 
-#[test]
-fn test_day01() {
-    assert_eq!(part1(INPUT), 70296)
+fn main() {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const SAMPLE_INPUT: &'static str = include_str!("../../inputs/day01_sample.txt");
+
+    #[test]
+    fn test_day01_sample() {
+        assert_eq!(part1(SAMPLE_INPUT), 24000)
+    }
+
+    #[test]
+    fn test_day01() {
+        assert_eq!(part1(INPUT), 70296)
+    }
+
+    #[test]
+    fn test_day02_sample() {
+        assert_eq!(part2(SAMPLE_INPUT), 45000)
+    }
+
+    #[test]
+    fn test_day02() {
+        assert_eq!(part2(INPUT), 205381)
+    }
 }

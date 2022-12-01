@@ -44,7 +44,10 @@ fn part2(input: &str) -> u64 {
     calories.iter().rev().take(3).sum()
 }
 
-fn main() {}
+fn main() {
+    println!("part1: {}", part1(INPUT));
+    println!("part2: {}", part2(INPUT));
+}
 
 #[cfg(test)]
 mod tests {

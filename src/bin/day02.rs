@@ -11,6 +11,36 @@ struct Round {
     opp_shape: Shape,
 }
 
+#[derive(Debug)]
+enum RoundResult {
+    Win,
+    Lose,
+    Draw,
+}
+
+impl RoundResult {
+    fn score(&self) -> u64 {
+        match &self {
+            Self::Win => 6,
+            Self::Lose => 0,
+            Self::Draw => 3,
+        }
+    }
+}
+
+impl FromStr for RoundResult {
+    type Err = UnknownInput;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "X" => Ok(Self::Lose),
+            "Y" => Ok(Self::Draw),
+            "Z" => Ok(Self::Win),
+            _ => unreachable!(),
+        }
+    }
+}
+
 impl Round {
     fn total_score(&self) -> u64 {
         let shape_score = match self.my_shape {
@@ -55,6 +85,32 @@ impl FromStr for Shape {
     }
 }
 
+impl Shape {
+    fn score(&self) -> u64 {
+        match self {
+            Self::Rock => 1,
+            Self::Paper => 2,
+            Self::Scissors => 3,
+        }
+    }
+
+    fn winning_shape(&self) -> Self {
+        match self {
+            Self::Rock => Self::Paper,
+            Self::Paper => Self::Scissors,
+            Self::Scissors => Self::Rock,
+        }
+    }
+
+    fn losing_shape(&self) -> Self {
+        match self {
+            Self::Rock => Self::Scissors,
+            Self::Paper => Self::Rock,
+            Self::Scissors => Self::Paper,
+        }
+    }
+}
+
 fn parse_input(input: &str) {}
 
 fn part1(input: &str) -> u64 {
@@ -73,18 +129,34 @@ fn part1(input: &str) -> u64 {
     total
 }
 
-// fn part2(input: &str) -> u64 {
-//     let elves = parse_input(input);
-//     let mut calories: Vec<u64> = elves.iter().map(Elf::total_calories).collect();
-//     calories.sort();
+fn part2(input: &str) -> u64 {
+    let mut total = 0;
 
-//     calories.iter().rev().take(3).sum()
-// }
+    for line in input.lines() {
+        let split: Vec<_> = line.split(' ').collect();
+        let opp_shape = split[0].parse::<Shape>().unwrap();
+        let result = split[1].parse::<RoundResult>().unwrap();
 
-// fn main() {
-//     println!("part1: {}", part1(INPUT));
-//     println!("part2: {}", part2(INPUT));
-// }
+        let my_shape = match &result {
+            RoundResult::Lose => opp_shape.losing_shape(),
+            RoundResult::Draw => opp_shape,
+            RoundResult::Win => opp_shape.winning_shape(),
+        };
+
+        total += Round {
+            my_shape,
+            opp_shape,
+        }
+        .total_score();
+    }
+
+    total
+}
+
+fn main() {
+    println!("part1: {}", part1(INPUT));
+    println!("part2: {}", part2(INPUT));
+}
 
 #[cfg(test)]
 mod tests {
@@ -102,13 +174,13 @@ mod tests {
         assert_eq!(part1(INPUT), 12276)
     }
 
-    // #[test]
-    // fn test_day02_sample() {
-    //     assert_eq!(part2(SAMPLE_INPUT), 45000)
-    // }
+    #[test]
+    fn test_day02_sample() {
+        assert_eq!(part2(SAMPLE_INPUT), 12)
+    }
 
-    // #[test]
-    // fn test_day02() {
-    //     assert_eq!(part2(INPUT), 205381)
-    // }
+    #[test]
+    fn test_day02() {
+        assert_eq!(part2(INPUT), 9975)
+    }
 }

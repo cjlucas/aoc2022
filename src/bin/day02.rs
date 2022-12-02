@@ -11,6 +11,18 @@ struct Round {
     opp_shape: Shape,
 }
 
+impl Round {
+    fn result(&self) -> RoundResult {
+        if self.my_shape == self.opp_shape {
+            RoundResult::Draw
+        } else if self.opp_shape == self.my_shape.winning_shape() {
+            RoundResult::Lose
+        } else {
+            RoundResult::Win
+        }
+    }
+}
+
 #[derive(Debug)]
 enum RoundResult {
     Win,
@@ -43,29 +55,11 @@ impl FromStr for RoundResult {
 
 impl Round {
     fn total_score(&self) -> u64 {
-        let shape_score = match self.my_shape {
-            Shape::Rock => 1,
-            Shape::Paper => 2,
-            Shape::Scissors => 3,
-        };
-
-        let outcome_score = match (self.my_shape, self.opp_shape) {
-            (Shape::Rock, Shape::Rock) => 3,
-            (Shape::Rock, Shape::Paper) => 0,
-            (Shape::Rock, Shape::Scissors) => 6,
-            (Shape::Paper, Shape::Rock) => 6,
-            (Shape::Paper, Shape::Paper) => 3,
-            (Shape::Paper, Shape::Scissors) => 0,
-            (Shape::Scissors, Shape::Rock) => 0,
-            (Shape::Scissors, Shape::Paper) => 6,
-            (Shape::Scissors, Shape::Scissors) => 3,
-        };
-
-        shape_score + outcome_score
+        self.my_shape.score() + self.result().score()
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 enum Shape {
     Rock,
     Paper,
@@ -110,8 +104,6 @@ impl Shape {
         }
     }
 }
-
-fn parse_input(input: &str) {}
 
 fn part1(input: &str) -> u64 {
     let mut total = 0;

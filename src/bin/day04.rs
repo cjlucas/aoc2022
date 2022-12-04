@@ -26,7 +26,31 @@ fn part1(input: &str) -> u64 {
 }
 
 fn part2(input: &str) -> u64 {
-    0
+    let mut answer = 0;
+
+    for line in input.lines() {
+        let pair = line.split_once(',').unwrap();
+        let first = pair.0.split_once('-').unwrap();
+        let start1 = first.0.parse::<u64>().unwrap();
+        let end1 = first.1.parse::<u64>().unwrap();
+
+        let first = pair.1.split_once('-').unwrap();
+        let start2 = first.0.parse::<u64>().unwrap();
+        let end2 = first.1.parse::<u64>().unwrap();
+
+        for n in start1..(end1 + 1) {
+            if (start2..=end2).contains(&n) {
+                answer += 1;
+                break;
+            }
+        }
+
+        // if (start1 >= start2 || end1 <= end2) || (start2 >= start1 || end2 <= end1) {
+        //     answer += 1;
+        // }
+    }
+
+    answer
 }
 
 fn main() {
@@ -50,13 +74,13 @@ mod tests {
         assert_eq!(part1(INPUT), 448);
     }
 
-    // #[test]
-    // fn test_day02_sample() {
-    //     assert_eq!(part2(SAMPLE_INPUT), 70);
-    // }
+    #[test]
+    fn test_day02_sample() {
+        assert_eq!(part2(SAMPLE_INPUT), 4);
+    }
 
-    // #[test]
-    // fn test_day02() {
-    //     assert_eq!(part2(INPUT), 2415);
-    // }
+    #[test]
+    fn test_day02() {
+        assert_eq!(part2(INPUT), 794);
+    }
 }

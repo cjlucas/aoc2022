@@ -1,21 +1,69 @@
 use std::collections::HashSet;
+use std::convert::Infallible;
+use std::str::FromStr;
 
 const INPUT: &'static str = include_str!("../../inputs/day03.txt");
+
+struct Rucksack {
+    items: Vec<Item>,
+}
+
+impl FromStr for Rucksack {
+    type Err = Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Rucksack {
+            items: s.chars().map(Item::from).collect(),
+        })
+    }
+}
+
+#[derive(Debug, Hash, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+struct Item(char);
+
+impl Item {
+    fn priority(&self) -> u64 {
+        let foo = if self.0.is_uppercase() { 38 } else { 96 };
+
+        TryInto::<u32>::try_into(self.0).unwrap() as u64 - foo
+    }
+}
+
+impl From<char> for Item {
+    fn from(c: char) -> Self {
+        Self(c)
+    }
+}
+
+fn common_items<'a, T>(v: Vec<T>) -> HashSet<&'a Item>
+where
+    T: IntoIterator<Item = &'a Item> + Clone,
+{
+    let sets: Vec<_> = v.iter().cloned().map(|x| HashSet::from_iter(x)).collect();
+    sets.iter()
+        .cloned()
+        .reduce(|acc, x| acc.intersection(&x).cloned().collect())
+        .unwrap()
+}
 
 fn part1(input: &str) -> u64 {
     let mut total = 0;
 
     for line in input.lines() {
-        let div = line.len() / 2;
-        let first: HashSet<char> = line.chars().take(div).collect();
-        let second: HashSet<char> = line.chars().skip(div).collect();
-        let mut intersection: Vec<_> = first.intersection(&second).collect();
-        intersection.sort();
+        let rucksack = Rucksack::from_str(line).unwrap();
 
-        let c = *intersection.last().unwrap();
-        let foo = if c.is_uppercase() { 38 } else { 96 };
+        let div = rucksack.items.len() / 2;
+        let first: HashSet<_> = rucksack.items.iter().take(div).collect();
+        let second: HashSet<_> = rucksack.items.iter().skip(div).collect();
 
-        total += TryInto::<u32>::try_into(*c).unwrap() as u64 - foo
+        let common_items: HashSet<_> = common_items(vec![first, second]);
+
+        total += common_items
+            .iter()
+            .cloned()
+            .map(|item| item.priority())
+            .max()
+            .unwrap();
     }
 
     total
@@ -27,19 +75,17 @@ fn part2(input: &str) -> u64 {
     let lines: Vec<_> = input.lines().collect();
 
     for group in lines.chunks(3) {
-        let first: HashSet<_> = group[0].chars().collect();
-        let second: HashSet<_> = group[1].chars().collect();
-        let third: HashSet<_> = group[2].chars().collect();
+        let first = Rucksack::from_str(group[0]).unwrap().items;
+        let second = Rucksack::from_str(group[1]).unwrap().items;
+        let third = Rucksack::from_str(group[2]).unwrap().items;
 
-        let mut intersection: HashSet<_> = first.intersection(&second).cloned().collect();
-        intersection = intersection.intersection(&third).cloned().collect();
-        let mut intersection: Vec<_> = intersection.iter().collect();
-        intersection.sort();
+        let common_items: HashSet<_> = common_items(vec![&first, &second, &third]);
 
-        let c = *intersection.last().unwrap();
-        let foo = if c.is_uppercase() { 38 } else { 96 };
-
-        total += TryInto::<u32>::try_into(*c).unwrap() as u64 - foo
+        total += common_items
+            .iter()
+            .map(|item| item.priority())
+            .max()
+            .unwrap();
     }
 
     total

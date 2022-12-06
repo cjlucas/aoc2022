@@ -1,7 +1,3 @@
-use std::collections::HashSet;
-use std::convert::Infallible;
-use std::str::FromStr;
-
 const INPUT: &'static str = include_str!("../../inputs/day04.txt");
 
 fn part1(input: &str) -> u64 {

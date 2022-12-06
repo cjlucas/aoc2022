@@ -3,15 +3,15 @@ use std::str::FromStr;
 
 const INPUT: &'static str = include_str!("../../inputs/day06.txt");
 
-fn part1(input: &str) -> u64 {
+fn find_marker(input: &str, marker_size: usize) -> u64 {
     let mut answer = 0;
 
     let chars: Vec<char> = input.chars().collect();
 
-    for window in chars.windows(4) {
+    for window in chars.windows(marker_size) {
         let set: HashSet<&char> = window.iter().collect();
-        if set.len() == 4 {
-            return answer + 4;
+        if set.len() == marker_size {
+            return answer + marker_size as u64;
         }
 
         answer += 1;
@@ -20,21 +20,12 @@ fn part1(input: &str) -> u64 {
     unreachable!()
 }
 
+fn part1(input: &str) -> u64 {
+    find_marker(input, 4)
+}
+
 fn part2(input: &str) -> u64 {
-    let mut answer = 0;
-
-    let chars: Vec<char> = input.chars().collect();
-
-    for window in chars.windows(14) {
-        let set: HashSet<&char> = window.iter().collect();
-        if set.len() == 14 {
-            return answer + 14;
-        }
-
-        answer += 1;
-    }
-
-    unreachable!()
+    find_marker(input, 14)
 }
 
 fn main() {

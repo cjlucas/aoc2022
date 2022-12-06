@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::str::FromStr;
 
 const INPUT: &'static str = include_str!("../../inputs/day06.txt");
 
@@ -36,8 +35,6 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    const SAMPLE_INPUT: &'static str = "mjqjpqmgbljsphdztnvjfqwrcgsmlb";
 
     #[test]
     fn test_day01_part1_sample1() {

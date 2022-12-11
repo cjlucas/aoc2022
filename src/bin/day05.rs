@@ -8,7 +8,22 @@ struct Stack {
     crates: VecDeque<char>,
 }
 
-fn part1(input: &str) -> u64 {
+fn parse_inst(input: &str) -> nom::IResult<&str, (usize, usize, usize)> {
+    use nom::bytes::complete::tag;
+    use nom::bytes::complete::take_while;
+    use nom::combinator::map_res;
+
+    let (input, _) = tag("move ")(input)?;
+    let (input, num_moves) = map_res(take_while(char::is_numeric), usize::from_str)(input)?;
+    let (input, _) = tag(" from ")(input)?;
+    let (input, src) = map_res(take_while(char::is_numeric), usize::from_str)(input)?;
+    let (input, _) = tag(" to ")(input)?;
+    let (input, dest) = map_res(take_while(char::is_numeric), usize::from_str)(input)?;
+
+    Ok((input, (num_moves, src, dest)))
+}
+
+fn part1(input: &str) -> String {
     let mut map: HashMap<usize, Vec<&str>> = HashMap::new();
 
     let mut lines_iter = input.lines();
@@ -44,45 +59,45 @@ fn part1(input: &str) -> u64 {
     }
 
     dbg!(&stacks);
+    dbg!(&stacks.len());
 
     for line in &mut lines_iter {
-        dbg!(&line);
-        let inst: Vec<_> = line
-            .matches(char::is_numeric)
-            .map(|c| u64::from_str(c).unwrap())
-            .collect();
+        // dbg!(&line);
+        let (_, inst) = parse_inst(line).unwrap();
 
         dbg!(&inst);
-        let num_moves = inst[0];
-        let mut src = stacks.get_mut(inst[1] as usize - 1).unwrap();
+        let num_moves = inst.0;
+        let src = stacks.get_mut(inst.1 as usize - 1).unwrap();
 
         let mut temp: Vec<char> = vec![];
 
         for _ in 0..num_moves {
+            // if let Some(c) = src.crates.pop_front() {
+            //     temp.push(c);
+            // }
             let c = src.crates.pop_front().unwrap();
             temp.push(c);
         }
 
-        let mut dest = stacks.get_mut(inst[2] as usize - 1).unwrap();
+        let dest = stacks.get_mut(inst.2 as usize - 1).unwrap();
 
         for c in temp {
             dest.crates.push_front(c);
         }
 
-        dbg!(&stacks);
+        // dbg!(&stacks);
     }
 
-    let mut answer: String = stacks
+    let answer: String = stacks
         .iter()
         .map(|stack| stack.crates.front().unwrap_or(&' '))
         .collect();
 
-    dbg!(answer);
-    0
+    answer
 }
 
-fn part2(input: &str) -> u64 {
-    0
+fn part2(_input: &str) -> String {
+    "".to_string()
 }
 
 fn main() {
@@ -98,13 +113,18 @@ mod tests {
 
     #[test]
     fn test_day01_sample() {
-        assert_eq!(part1(SAMPLE_INPUT), 157);
+        assert_eq!(part1(SAMPLE_INPUT), "CMZ");
     }
 
-    // #[test]
-    // fn test_day01() {
-    //     assert_eq!(part1(INPUT), 7766);
-    // }
+    #[test]
+    fn test_parse_inst01() {
+        assert_eq!(parse_inst("move 14 from 5 to 6"), Ok(("", (14, 5, 6))));
+    }
+
+    #[test]
+    fn test_day01() {
+        assert_eq!(part1(INPUT), "");
+    }
 
     // #[test]
     // fn test_day02_sample() {

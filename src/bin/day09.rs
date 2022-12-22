@@ -75,7 +75,53 @@ fn part1(input: &str) -> u64 {
 }
 
 fn part2(input: &str) -> u64 {
-    0
+    let steps: Vec<_> = input
+        .lines()
+        .map(Step::from_str)
+        .map(Result::unwrap)
+        .collect();
+
+    let mut vists: HashSet<(i64, i64)> = HashSet::new();
+    let mut knots = [(0i64, 0i64); 10];
+
+    vists.insert(knots[9]);
+
+    for step in steps {
+        for _ in 0..step.distance {
+            match step.direction {
+                Direction::Up => knots[0].1 += 1,
+                Direction::Down => knots[0].1 -= 1,
+                Direction::Left => knots[0].0 -= 1,
+                Direction::Right => knots[0].0 += 1,
+            }
+
+            for i in 1..10 {
+                if (knots[i - 1].1 - knots[i].1).abs() > 1
+                    || (knots[i - 1].0 - knots[i].0).abs() > 1
+                {
+                    knots[i] = *vec![
+                        (knots[i].0, knots[i].1 + 1),     // N
+                        (knots[i].0 + 1, knots[i].1 + 1), // NE
+                        (knots[i].0 + 1, knots[i].1),     // E
+                        (knots[i].0 + 1, knots[i].1 - 1), // SE
+                        (knots[i].0, knots[i].1 - 1),     // S
+                        (knots[i].0 - 1, knots[i].1 - 1), // SW
+                        (knots[i].0 - 1, knots[i].1),     // W
+                        (knots[i].0 - 1, knots[i].1 + 1), // NW
+                    ]
+                    .iter()
+                    .min_by_key(|loc| {
+                        (loc.1 - knots[i - 1].1).abs() + (loc.0 - knots[i - 1].0).abs()
+                    })
+                    .unwrap()
+                }
+            }
+
+            vists.insert(knots[9]);
+        }
+    }
+
+    vists.len() as u64
 }
 
 fn main() {
@@ -88,6 +134,7 @@ mod tests {
     use super::*;
 
     const SAMPLE_INPUT: &'static str = include_str!("../../inputs/day09_sample.txt");
+    const SAMPLE_INPUT2: &'static str = include_str!("../../inputs/day09_sample2.txt");
 
     #[test]
     fn test_day01_sample() {
@@ -99,13 +146,13 @@ mod tests {
         assert_eq!(part1(INPUT), 5874);
     }
 
-    // #[test]
-    // fn test_day02_sample() {
-    //     assert_eq!(part2(SAMPLE_INPUT), 8);
-    // }
+    #[test]
+    fn test_day02_sample() {
+        assert_eq!(part2(SAMPLE_INPUT2), 36);
+    }
 
-    // #[test]
-    // fn test_day02() {
-    //     assert_eq!(part2(INPUT), 371200);
-    // }
+    #[test]
+    fn test_day02() {
+        assert_eq!(part2(INPUT), 2467);
+    }
 }

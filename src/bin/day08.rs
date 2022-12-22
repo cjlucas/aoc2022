@@ -39,7 +39,7 @@ fn parse_input(input: &str) -> Vec<Vec<Tree>> {
     forest
 }
 
-fn foo(trees: &Vec<Vec<Tree>>, row: usize, col: usize) -> bool {
+fn is_visible(trees: &Vec<Vec<Tree>>, row: usize, col: usize) -> bool {
     if row == 0 || col == 0 || row == trees.len() - 1 || col == trees[row].len() - 1 {
         return true;
     }
@@ -79,7 +79,7 @@ fn part1(input: &str) -> u64 {
     for row in 0..trees.len() {
         assert!(trees[row].len() == trees[0].len());
         for col in 0..trees[row].len() {
-            if foo(&trees, row, col) {
+            if is_visible(&trees, row, col) {
                 answer += 1;
             }
         }
@@ -89,7 +89,57 @@ fn part1(input: &str) -> u64 {
 }
 
 fn part2(input: &str) -> u64 {
-    0
+    let trees = parse_input(input);
+
+    let mut answer = 0;
+
+    for row in 0..trees.len() {
+        for col in 0..trees[row].len() {
+            let tree = &trees[row][col];
+            let mut viewing_distances = vec![0u64, 0, 0, 0];
+
+            for i in (0..row).rev() {
+                viewing_distances[0] += 1;
+                if &trees[i][col] >= tree {
+                    break;
+                }
+            }
+
+            for i in (row + 1..trees.len()) {
+                viewing_distances[1] += 1;
+                if &trees[i][col] >= tree {
+                    break;
+                }
+            }
+
+            for i in (0..col).rev() {
+                viewing_distances[2] += 1;
+                if &trees[row][i] >= tree {
+                    break;
+                }
+            }
+
+            for i in (col + 1..trees[row].len()) {
+                viewing_distances[3] += 1;
+                if &trees[row][i] >= tree {
+                    break;
+                }
+            }
+
+            let scenic_score = viewing_distances.iter().fold(1, |acc, x| acc * x);
+
+            // println!(
+            //     "({}, {}) = {:?} = {}",
+            //     row, col, &viewing_distances, scenic_score
+            // );
+
+            if scenic_score > answer {
+                answer = scenic_score;
+            }
+        }
+    }
+
+    answer
 }
 
 fn main() {
@@ -113,13 +163,13 @@ mod tests {
         assert_eq!(part1(INPUT), 1705);
     }
 
-    // #[test]
-    // fn test_day02_sample() {
-    //     assert_eq!(part2(SAMPLE_INPUT), 4);
-    // }
+    #[test]
+    fn test_day02_sample() {
+        assert_eq!(part2(SAMPLE_INPUT), 8);
+    }
 
-    // #[test]
-    // fn test_day02() {
-    //     assert_eq!(part2(INPUT), 794);
-    // }
+    #[test]
+    fn test_day02() {
+        assert_eq!(part2(INPUT), 371200);
+    }
 }

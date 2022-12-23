@@ -40,14 +40,16 @@ impl FromStr for Instruction {
     }
 }
 
-fn part1(input: &str) -> i64 {
-    let instructions: Vec<_> = input
+fn parse_input(input: &str) -> Vec<Instruction> {
+    input
         .lines()
         .map(Instruction::from_str)
         .map(Result::unwrap)
-        .collect();
+        .collect()
+}
 
-    let mut cpu = CPU { x: 1 };
+fn part1(input: &str) -> i64 {
+    let instructions = parse_input(input);
 
     let mut cycles = vec![CPU { x: 1 }];
     for inst in instructions {
@@ -62,8 +64,33 @@ fn part1(input: &str) -> i64 {
         .sum()
 }
 
-fn part2(input: &str) -> u64 {
-    unreachable!()
+fn part2(input: &str) -> String {
+    let instructions = parse_input(input);
+    let mut cycles = vec![CPU { x: 1 }];
+    for inst in instructions {
+        for cycle in cycles.iter().last().unwrap().process_instruction(&inst) {
+            cycles.push(cycle);
+        }
+    }
+
+    let mut answer = String::new();
+
+    for cycle in 1..=240 {
+        let x = cycles[cycle - 1].x;
+        let pixel = (cycle as i64 - 1) % 40;
+
+        if (x - 1..=x + 1).contains(&pixel) {
+            answer.push('#');
+        } else {
+            answer.push('.');
+        }
+
+        if cycle % 40 == 0 {
+            answer.push('\n');
+        }
+    }
+
+    answer
 }
 
 fn main() {
@@ -84,16 +111,19 @@ mod tests {
 
     #[test]
     fn test_day01() {
-        assert_eq!(part1(INPUT), 0);
+        assert_eq!(part1(INPUT), 13920);
     }
 
-    // #[test]
-    // fn test_day02_sample() {
-    //     assert_eq!(part2(SAMPLE_INPUT), 36);
-    // }
+    #[test]
+    fn test_day02_sample() {
+        const EXPECTED_RESULT: &'static str =
+            include_str!("../../inputs/day10_part2_sample_answer.txt");
+        assert_eq!(part2(SAMPLE_INPUT), EXPECTED_RESULT);
+    }
 
-    // #[test]
-    // fn test_day02() {
-    //     assert_eq!(part2(INPUT), 2467);
-    // }
+    #[test]
+    fn test_day02() {
+        const EXPECTED_RESULT: &'static str = include_str!("../../inputs/day10_part2_answer.txt");
+        assert_eq!(part2(INPUT), EXPECTED_RESULT);
+    }
 }

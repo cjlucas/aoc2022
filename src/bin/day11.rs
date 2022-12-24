@@ -133,8 +133,54 @@ fn part1(mut input: Vec<Monkey>) -> u64 {
         .fold(1, |acc, x| acc * x)
 }
 
-fn part2(input: &str) -> String {
-    unreachable!();
+fn part2(input: Vec<Monkey>) -> u64 {
+    let mut items_inspected = vec![0; input.len()];
+    let monkeys: Vec<RefCell<Monkey>> = input.into_iter().map(RefCell::new).collect();
+
+    for round in 0..10_000 {
+        for (idx, ref_cell) in monkeys.iter().enumerate() {
+            let mut monkey = ref_cell.borrow_mut();
+
+            while let Some(item) = monkey.items.pop_front() {
+                items_inspected[idx] += 1;
+
+                // println!("{} {:?}", item, monkey.operation);
+                let worry_level = match monkey.operation {
+                    WorryOp::Add(i) => item + i,
+                    WorryOp::Mul(i) => item * i,
+                    WorryOp::Sqr => item * item,
+                };
+                // dbg!(&worry_level);
+
+                // dbg!(&worry_level);
+
+                let (worry_level, dest) = if monkey.test_worry_level(worry_level) {
+                    let i = match monkey.test {
+                        WorryTest::Div(i) => i,
+                    };
+
+                    (i, monkey.destinations.t)
+                } else {
+                    let i = match monkey.test {
+                        WorryTest::Div(i) => i,
+                    };
+
+                    (i + (worry_level % i), monkey.destinations.f)
+                };
+
+                // println!("moving {} from {} to {}", worry_level, idx, dest);
+
+                monkeys[dest].borrow_mut().items.push_back(worry_level);
+            }
+        }
+    }
+
+    items_inspected.sort();
+    items_inspected
+        .iter()
+        .rev()
+        .take(2)
+        .fold(1, |acc, x| acc * x)
 }
 
 fn main() {
@@ -187,12 +233,10 @@ mod tests {
         assert_eq!(part1(input()), 55930);
     }
 
-    // #[test]
-    // fn test_day02_sample() {
-    //     const EXPECTED_RESULT: &'static str =
-    //         include_str!("../../inputs/day10_part2_sample_answer.txt");
-    //     assert_eq!(part2(SAMPLE_INPUT), EXPECTED_RESULT);
-    // }
+    #[test]
+    fn test_day02_sample() {
+        assert_eq!(part2(sample_input()), 2713310158);
+    }
 
     // #[test]
     // fn test_day02() {

@@ -105,22 +105,22 @@ mod tests {
     const SAMPLE_INPUT: &'static str = include_str!("../../inputs/day12_sample.txt");
 
     #[test]
-    fn test_day01_sample() {
+    fn test_day12_part1_sample() {
         assert_eq!(part1(SAMPLE_INPUT), 31);
     }
 
     #[test]
-    fn test_day01() {
+    fn test_day12_part1() {
         assert_eq!(part1(INPUT), 394);
     }
 
     #[test]
-    fn test_day02_sample() {
+    fn test_day12_part2_sample() {
         assert_eq!(part2(SAMPLE_INPUT), 29);
     }
 
     #[test]
-    fn test_day02() {
+    fn test_day12_part2() {
         assert_eq!(part2(INPUT), 388);
     }
 }
